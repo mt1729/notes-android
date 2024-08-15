@@ -26,11 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 
 @Preview
 @Composable
-fun ListDetailsView() {
+fun ListDetailsView(viewModel: ListDetailsViewModel = viewModel()) {
     val notes = listOf(Note("This is the content of a note.", emptyList()))
 
     Column(
