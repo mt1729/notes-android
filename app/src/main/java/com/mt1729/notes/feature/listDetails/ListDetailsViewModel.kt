@@ -45,8 +45,8 @@ class ListDetailsViewModel @Inject constructor(
         }
     }
 
-    fun selectNote(note: Note) {
-
+    fun selectNote(noteIndex: Int) {
+        _selectedNote.update { _notes.value.getOrNull(noteIndex) }
     }
 
     fun addTagToNote() {

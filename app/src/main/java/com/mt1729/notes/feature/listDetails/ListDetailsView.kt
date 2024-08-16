@@ -21,8 +21,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
+import kotlinx.coroutines.launch
 
 @Preview
 @Composable
@@ -45,7 +49,9 @@ fun ListDetailsPreview() {
                     Tag("Tag preview 2")
                 )
             )
-        ), selectedNoteText = "1 / 24"
+        ),
+        selectedNoteText = "1 / 24",
+        onNoteSelect = {}
     )
 }
 
@@ -53,15 +59,21 @@ fun ListDetailsPreview() {
 fun ListDetailsView(viewModel: ListDetailsViewModel = viewModel()) {
     val notes by viewModel.notes.collectAsState()
     val selectedNoteText by viewModel.selectedNoteText.collectAsState()
+    val onNoteSelect = { noteIndex: Int -> viewModel.selectNote(noteIndex) }
 
-    ListDetailsView(notes, selectedNoteText)
+    ListDetailsView(notes, selectedNoteText, onNoteSelect)
 }
 
 // Preview-compatible overload
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ListDetailsView(notes: List<Note>, selectedNoteText: String) {
+fun ListDetailsView(notes: List<Note>, selectedNoteText: String, onNoteSelect: (Int) -> Unit) {
+    val coroutineScope = rememberCoroutineScope()
     val notePagerState = rememberPagerState { notes.size }
+
+    LaunchedEffect(key1 = notePagerState) {
+        snapshotFlow { notePagerState.currentPage }.collect { pageIndex -> onNoteSelect(pageIndex) }
+    }
 
     Column(
         modifier = Modifier
@@ -101,11 +113,19 @@ fun ListDetailsView(notes: List<Note>, selectedNoteText: String) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        notePagerState.animateScrollToPage(notePagerState.currentPage - 1)
+                    }
+                }) {
                     Icon(imageVector = Icons.Sharp.ArrowBack, contentDescription = "Previous note")
                 }
                 Text(modifier = Modifier.align(Alignment.CenterVertically), text = selectedNoteText)
-                IconButton(onClick = {}) {
+                IconButton(onClick = {
+                    coroutineScope.launch {
+                        notePagerState.animateScrollToPage(notePagerState.currentPage + 1)
+                    }
+                }) {
                     Icon(imageVector = Icons.Sharp.ArrowForward, contentDescription = "Next note")
                 }
             }
