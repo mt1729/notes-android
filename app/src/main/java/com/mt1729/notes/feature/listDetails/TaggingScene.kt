@@ -27,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
@@ -47,46 +48,51 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random.Default.nextBoolean
 
 @Preview
 @Composable
-fun TaggingScenePreview() {
-    val tags = (1..20).map {
+fun NoteTaggingPreview() {
+    val mockTags = (1..20).map {
         val extraTxt = if (nextBoolean()) " Extra" else ""
         Tag("$extraTxt Tag $it")
     }
-    val notes = (1..3).map { Note("Note preview $it", tags) }
-    val selectedNoteText = "1 / 24"
+    val mockNotes = (1..3).map { Note("Note preview $it", mockTags) }
+    val mockSelectedNote = mockNotes.firstOrNull()
 
-    TaggingScene(notes = notes, tags = tags, selectedNoteText = selectedNoteText, onNoteSelect = {})
+    val vm = object : NoteViewModel {
+        override val tags = MutableStateFlow(mockTags)
+        override val notes = MutableStateFlow(mockNotes)
+        override val selectedNote = MutableStateFlow(mockSelectedNote)
+    }
+    NoteTaggingScene(vm = vm)
 }
 
-@Composable
-fun TaggingScene(viewModel: ListDetailsViewModel = viewModel()) {
-    val tags = (1..20).map {
-        val extraTxt = if (nextBoolean()) " Extra" else ""
-        Tag("$extraTxt Tag $it")
-    }
-    val notes by viewModel.notes.collectAsState()
-    val selectedNoteText by viewModel.selectedNoteText.collectAsState()
-    val onNoteSelect = { noteIndex: Int -> viewModel.selectNote(noteIndex) }
 
-    TaggingScene(notes, tags, selectedNoteText, onNoteSelect)
+// Hilt-provided injection / run-time
+@Composable
+fun NoteTaggingScene(vm: NoteTaggingViewModel = viewModel()) {
+    NoteTaggingScene(vm = vm as NoteViewModel)
 }
 
 // Preview-compatible overload
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TaggingScene(
-    notes: List<Note>, tags: List<Tag>, selectedNoteText: String, onNoteSelect: (Int) -> Unit
-) {
+fun NoteTaggingScene(vm: NoteViewModel) {
+    val tags by vm.tags.collectAsState()
+    val notes by vm.notes.collectAsState()
+
+    // todo: test in UI / local state
     val coroutineScope = rememberCoroutineScope()
     val notePagerState = rememberPagerState { notes.size }
+    val selectedNoteText = "${notePagerState.currentPage + 1} / ${notes.size}"
 
     LaunchedEffect(key1 = notePagerState) {
-        snapshotFlow { notePagerState.currentPage }.collect { pageIndex -> onNoteSelect(pageIndex) }
+        snapshotFlow {
+            notePagerState.currentPage
+        }.collect { pageIndex -> vm.selectNote(pageIndex) }
     }
 
     Scaffold(topBar = {
@@ -120,8 +126,18 @@ fun TaggingScene(
                 rows = StaggeredGridCells.Fixed(count = 2),
                 content = {
                     items(tags) { tag ->
-                        Button(modifier = Modifier.wrapContentHeight(), onClick = {}) {
-                            Text(text = tag.name)
+                        if (nextBoolean()) {
+                            Button(modifier = Modifier.wrapContentHeight(), onClick = {
+                                vm.removeTagFromSelectedNote(tag)
+                            }) {
+                                Text(text = tag.name)
+                            }
+                        } else {
+                            OutlinedButton(modifier = Modifier.wrapContentHeight(), onClick = {
+                                vm.addTagToSelectedNote(tag)
+                            }) {
+                                Text(text = tag.name)
+                            }
                         }
                     }
                 })

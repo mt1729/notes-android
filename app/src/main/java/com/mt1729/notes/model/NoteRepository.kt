@@ -3,8 +3,10 @@ package com.mt1729.notes.model
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class NoteRepository() {
+// todo: local persistence / Room
+class NoteRepository {
     fun getNotes(): Flow<List<Note>> = flow {
+        // todo: move test data
         val notes = listOf(
             Note(
                 "This is the content of a short note.", listOf(
@@ -38,4 +40,8 @@ class NoteRepository() {
 
         emit(notes.shuffled())
     }
+
+    fun updateNote(note: Note) {}
+    fun deleteNote(note: Note) {}
+    fun addNote(note: Note) {}
 }
