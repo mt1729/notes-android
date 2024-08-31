@@ -1,22 +1,29 @@
-package com.mt1729.notes.feature.listDetails
+package com.mt1729.notes.feature.noteTagging
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.NoteRepository
 import com.mt1729.notes.model.Tag
+import com.mt1729.notes.model.TagRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-interface NoteViewModel {
+
+interface NoteTaggingViewModelI {
     val notes: StateFlow<List<Note>>
     val tags: StateFlow<List<Tag>>
     val selectedNote: StateFlow<Note?>
+    val selectedNoteHeader: StateFlow<String>
 
     fun addTagToSelectedNote(tag: Tag) {}
     fun removeTagFromSelectedNote(tag: Tag) {}
@@ -34,8 +41,10 @@ data class NoteTaggingState(
 
 @HiltViewModel
 class NoteTaggingViewModel @Inject constructor(
-    private val notesRepository: NoteRepository
-) : ViewModel(), NoteViewModel {
+    // todo: use cases
+    private val noteRepository: NoteRepository,
+    private val tagRepository: TagRepository,
+) : ViewModel(), NoteTaggingViewModelI {
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     override val notes get() = _notes.asStateFlow()
 
@@ -45,11 +54,26 @@ class NoteTaggingViewModel @Inject constructor(
     private val _selectedNote = MutableStateFlow<Note?>(null)
     override val selectedNote get() = _selectedNote.asStateFlow()
 
+    override val selectedNoteHeader = _selectedNote.map { note ->
+        val notes = _notes.value
+        val currNoteIndex = notes.indexOf(note)
+
+        return@map if (note == null || currNoteIndex < 0) {
+            ""
+        } else {
+            "${currNoteIndex + 1} / ${notes.size}"
+        }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
     init {
         viewModelScope.launch {
-            notesRepository.getNotes().collect { newNotes ->
+            noteRepository.getNotes().collect { newNotes ->
                 _notes.update { newNotes }
                 _selectedNote.update { newNotes.firstOrNull() }
+            }
+
+            tagRepository.getTags().collect { newTags ->
+                _tags.update { newTags }
             }
         }
     }
@@ -60,19 +84,19 @@ class NoteTaggingViewModel @Inject constructor(
 
     override fun addTagToSelectedNote(tag: Tag) {
         val note = selectedNote.value ?: return
-        notesRepository.updateNote(note)
+        noteRepository.updateNote(note)
     }
 
     override fun removeTagFromSelectedNote(tag: Tag) {
         val note = selectedNote.value ?: return
-        notesRepository.updateNote(note)
+        noteRepository.updateNote(note)
     }
 
     override fun deleteNote(note: Note) {
-        notesRepository.deleteNote(note)
+        noteRepository.deleteNote(note)
     }
 
     override fun addNote(note: Note) {
-        notesRepository.addNote(note)
+        noteRepository.addNote(note)
     }
 }

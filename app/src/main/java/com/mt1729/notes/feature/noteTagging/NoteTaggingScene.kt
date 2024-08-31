@@ -1,4 +1,4 @@
-package com.mt1729.notes.feature.listDetails
+package com.mt1729.notes.feature.noteTagging
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -55,17 +55,20 @@ import kotlin.random.Random.Default.nextBoolean
 @Preview
 @Composable
 fun NoteTaggingPreview() {
+    // todo: move test data
     val mockTags = (1..20).map {
         val extraTxt = if (nextBoolean()) " Extra" else ""
         Tag("$extraTxt Tag $it")
     }
     val mockNotes = (1..3).map { Note("Note preview $it", mockTags) }
     val mockSelectedNote = mockNotes.firstOrNull()
+    val mockSelectedNoteHeader = "2 / 5"
 
-    val vm = object : NoteViewModel {
+    val vm = object : NoteTaggingViewModelI {
         override val tags = MutableStateFlow(mockTags)
         override val notes = MutableStateFlow(mockNotes)
         override val selectedNote = MutableStateFlow(mockSelectedNote)
+        override val selectedNoteHeader = MutableStateFlow(mockSelectedNoteHeader)
     }
     NoteTaggingScene(vm = vm)
 }
@@ -74,21 +77,20 @@ fun NoteTaggingPreview() {
 // Hilt-provided injection / run-time
 @Composable
 fun NoteTaggingScene(vm: NoteTaggingViewModel = viewModel()) {
-    NoteTaggingScene(vm = vm as NoteViewModel)
+    NoteTaggingScene(vm = vm as NoteTaggingViewModelI)
 }
 
 // Preview-compatible overload
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun NoteTaggingScene(vm: NoteViewModel) {
+fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
     val tags by vm.tags.collectAsState()
     val notes by vm.notes.collectAsState()
+    val selectedNoteHeader by vm.selectedNoteHeader.collectAsState()
 
     // todo: test in UI / local state
     val coroutineScope = rememberCoroutineScope()
     val notePagerState = rememberPagerState { notes.size }
-    val selectedNoteText = "${notePagerState.currentPage + 1} / ${notes.size}"
-
     LaunchedEffect(key1 = notePagerState) {
         snapshotFlow {
             notePagerState.currentPage
@@ -163,7 +165,7 @@ fun NoteTaggingScene(vm: NoteViewModel) {
                     }
                     Text(
                         modifier = Modifier.align(Alignment.CenterVertically),
-                        text = selectedNoteText
+                        text = selectedNoteHeader
                     )
                     IconButton(onClick = {
                         coroutineScope.launch {

@@ -14,4 +14,10 @@ object RepositoryModule {
     fun providesNoteRepository(): NoteRepository {
         return NoteRepository()
     }
+
+    @Singleton
+    @Provides
+    fun providesTagRepository(): TagRepository {
+        return TagRepository()
+    }
 }

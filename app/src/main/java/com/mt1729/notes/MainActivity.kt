@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.mt1729.notes.feature.listDetails.NoteTaggingScene
+import com.mt1729.notes.feature.noteTagging.NoteTaggingScene
 import com.mt1729.notes.ui.theme.NotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
