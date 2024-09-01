@@ -22,6 +22,7 @@ import androidx.compose.material.icons.automirrored.sharp.ArrowBack
 import androidx.compose.material.icons.automirrored.sharp.ArrowForward
 import androidx.compose.material.icons.sharp.Add
 import androidx.compose.material.icons.sharp.Menu
+import androidx.compose.material.icons.sharp.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -30,6 +31,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.ShapeDefaults
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -118,9 +121,11 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
                 onQueryChange = { vm.filterTags(it) },
                 onSearch = {},
                 active = false,
-                onActiveChange = {}) {
-
-            }
+                leadingIcon = {
+                    Icon(imageVector = Icons.Sharp.Search, contentDescription = "Search")
+                },
+                shape = ShapeDefaults.Medium,
+                onActiveChange = {}) {}
         })
     }) { innerPadding ->
         Column(

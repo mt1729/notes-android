@@ -1,5 +1,6 @@
 package com.mt1729.notes.feature.noteTagging
 
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mt1729.notes.model.Note
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -63,7 +65,9 @@ class NoteTaggingViewModel @Inject constructor(
     override val selectedNote get() = _selectedNote.asStateFlow()
 
     override val filteredTags get() = combine(_tags, _tagSearchQuery) { tags, tagSearchQuery ->
-        tags.filter { it.name.startsWith(tagSearchQuery) }
+        tags.filter {
+            it.name.lowercase().startsWith(tagSearchQuery.lowercase())
+        }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     override val selectedNoteHeader = _selectedNote.map { note ->
@@ -127,7 +131,7 @@ class NoteTaggingViewModel @Inject constructor(
     }
 
     override fun filterTags(query: String) {
-        _tagSearchQuery.update { it }
+        _tagSearchQuery.update { query }
     }
 
     fun addTag(name: String) {
