@@ -21,7 +21,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
-
+// Currently only for easier Compose previews
 interface NoteTaggingViewModelI {
     val tags: StateFlow<List<Tag>>
     val notes: StateFlow<List<Note>>
@@ -36,6 +36,7 @@ interface NoteTaggingViewModelI {
     fun filterTags(query: String) {}
     fun addTagToSelectedNote(tag: Tag) {}
     fun removeTagFromSelectedNote(tag: Tag) {}
+    fun addTag(name: String) {}
 }
 
 // todo: populate VM fields from default state
@@ -134,8 +135,15 @@ class NoteTaggingViewModel @Inject constructor(
         _tagSearchQuery.update { query }
     }
 
-    fun addTag(name: String) {
+    override fun addTag(name: String) {
         val newTag = Tag(name = name)
+        val selectedNote = selectedNote.value
+
+        val tagExistsInNote = selectedNote?.tags?.find { it.name == name } != null
+        if (!tagExistsInNote) {
+            addTagToSelectedNote(newTag)
+        }
+
         tagRepository.addTag(newTag)
     }
 }

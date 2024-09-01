@@ -110,11 +110,13 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
     Scaffold(topBar = {
         TopAppBar(navigationIcon = {
             IconButton(onClick = {}) {
-                Icon(imageVector = Icons.Sharp.Menu, contentDescription = "Add Tag")
+                Icon(imageVector = Icons.Sharp.Menu, contentDescription = "Menu")
             }
         }, actions = {
-            IconButton(onClick = {}) {
-                Icon(imageVector = Icons.Sharp.Add, contentDescription = "Menu")
+            IconButton(onClick = {
+                vm.addTag(searchTagQuery)
+            }) {
+                Icon(imageVector = Icons.Sharp.Add, contentDescription = "Add Tag")
             }
         }, title = {
             SearchBar(query = searchTagQuery,
