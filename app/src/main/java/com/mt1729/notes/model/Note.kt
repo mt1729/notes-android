@@ -1,3 +1,9 @@
 package com.mt1729.notes.model
 
-data class Note(val content: String, val tags: List<Tag>)
+import java.util.UUID
+
+data class Note(
+    val id: String = UUID.randomUUID().toString(),
+    val tags: List<Tag>,
+    val content: String,
+)

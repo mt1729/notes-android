@@ -18,9 +18,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.sharp.ArrowBack
+import androidx.compose.material.icons.automirrored.sharp.ArrowForward
 import androidx.compose.material.icons.sharp.Add
-import androidx.compose.material.icons.sharp.ArrowBack
-import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -49,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random.Default.nextBoolean
 
@@ -58,9 +59,11 @@ fun NoteTaggingPreview() {
     // todo: move test data
     val mockTags = (1..20).map {
         val extraTxt = if (nextBoolean()) " Extra" else ""
-        Tag("$extraTxt Tag $it")
+        Tag(name = "$extraTxt Tag $it")
     }
-    val mockNotes = (1..3).map { Note("Note preview $it", mockTags) }
+    val mockNotes = (1..3).map {
+        Note(content = "Note preview $it", tags = mockTags)
+    }
     val mockSelectedNote = mockNotes.firstOrNull()
     val mockSelectedNoteHeader = "2 / 5"
 
@@ -69,6 +72,8 @@ fun NoteTaggingPreview() {
         override val notes = MutableStateFlow(mockNotes)
         override val selectedNote = MutableStateFlow(mockSelectedNote)
         override val selectedNoteHeader = MutableStateFlow(mockSelectedNoteHeader)
+        override val tagSearchQuery = MutableStateFlow("")
+        override val filteredTags = MutableStateFlow(mockTags)
     }
     NoteTaggingScene(vm = vm)
 }
@@ -84,8 +89,10 @@ fun NoteTaggingScene(vm: NoteTaggingViewModel = viewModel()) {
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
-    val tags by vm.tags.collectAsState()
+    val filteredTags by vm.filteredTags.collectAsState()
     val notes by vm.notes.collectAsState()
+    val selectedNote by vm.selectedNote.collectAsState()
+    val searchTagQuery by vm.tagSearchQuery.collectAsState()
     val selectedNoteHeader by vm.selectedNoteHeader.collectAsState()
 
     // todo: test in UI / local state
@@ -107,8 +114,8 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
                 Icon(imageVector = Icons.Sharp.Add, contentDescription = "Menu")
             }
         }, title = {
-            SearchBar(query = "",
-                onQueryChange = {},
+            SearchBar(query = searchTagQuery,
+                onQueryChange = { vm.filterTags(it) },
                 onSearch = {},
                 active = false,
                 onActiveChange = {}) {
@@ -127,8 +134,10 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
                 horizontalItemSpacing = 8.dp,
                 rows = StaggeredGridCells.Fixed(count = 2),
                 content = {
-                    items(tags) { tag ->
-                        if (nextBoolean()) {
+                    items(filteredTags) { tag ->
+                        // todo: test in UI
+                        // todo: truncate both (half screen width?)
+                        if (selectedNote?.tags?.contains(tag) == true) {
                             Button(modifier = Modifier.wrapContentHeight(), onClick = {
                                 vm.removeTagFromSelectedNote(tag)
                             }) {
@@ -159,7 +168,7 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Sharp.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Sharp.ArrowBack,
                             contentDescription = "Previous note"
                         )
                     }
@@ -173,7 +182,8 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Sharp.ArrowForward, contentDescription = "Next note"
+                            imageVector = Icons.AutoMirrored.Sharp.ArrowForward,
+                            contentDescription = "Next note"
                         )
                     }
                 }
