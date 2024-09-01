@@ -1,6 +1,5 @@
 package com.mt1729.notes.feature.noteTagging
 
-import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mt1729.notes.model.Note
@@ -14,11 +13,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 
 // Currently only for easier Compose previews
@@ -56,6 +53,7 @@ class NoteTaggingViewModel @Inject constructor(
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     override val notes get() = _notes.asStateFlow()
 
+    // todo: refactor to set (list checking redundant)
     private val _tags = MutableStateFlow<List<Tag>>(emptyList())
     override val tags get() = _tags.asStateFlow()
 
@@ -68,14 +66,16 @@ class NoteTaggingViewModel @Inject constructor(
     override val filteredTags get() = combine(_tags, _tagSearchQuery) { tags, tagSearchQuery ->
         tags.filter {
             it.name.lowercase().startsWith(tagSearchQuery.lowercase())
+        }.sortedBy {
+            it.name
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    override val selectedNoteHeader = _selectedNote.map { note ->
+    override val selectedNoteHeader = _selectedNote.map { selectedNote ->
         val notes = _notes.value
-        val currNoteIndex = notes.indexOf(note)
+        val currNoteIndex = notes.indexOfFirst { it.id == selectedNote?.id }
 
-        return@map if (note == null || currNoteIndex < 0) {
+        return@map if (selectedNote == null || currNoteIndex < 0) {
             ""
         } else {
             "${currNoteIndex + 1} / ${notes.size}"
@@ -86,7 +86,6 @@ class NoteTaggingViewModel @Inject constructor(
         viewModelScope.launch {
             noteRepository.getNotes().collect { newNotes ->
                 _notes.update { newNotes }
-                _selectedNote.update { newNotes.firstOrNull() }
             }
         }
 
@@ -104,11 +103,12 @@ class NoteTaggingViewModel @Inject constructor(
     override fun addTagToSelectedNote(tag: Tag) {
         val note = selectedNote.value ?: return
 
-        val tags = note.tags.toMutableList()
-        if (!tags.contains(tag)) {
-            tags.add(tag)
+        val tagsInNote = note.tags.toMutableList()
+        if (!tagsInNote.contains(tag)) {
+            tagsInNote.add(tag)
 
-            val updatedNote = note.copy(tags = tags)
+            val updatedNote = note.copy(tags = tagsInNote)
+            _selectedNote.update { updatedNote }
             noteRepository.updateNote(updatedNote)
         }
     }
@@ -119,6 +119,7 @@ class NoteTaggingViewModel @Inject constructor(
         val tags = note.tags.toMutableList()
         if (tags.remove(tag)) {
             val updatedNote = note.copy(tags = tags)
+            _selectedNote.update { updatedNote }
             noteRepository.updateNote(updatedNote)
         }
     }
