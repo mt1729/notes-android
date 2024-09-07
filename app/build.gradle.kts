@@ -54,6 +54,10 @@ android {
 dependencies {
     ksp(libs.hilt.compiler)
 
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+
     implementation(libs.hilt.android)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
