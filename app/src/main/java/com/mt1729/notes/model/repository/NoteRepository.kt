@@ -1,14 +1,11 @@
-package com.mt1729.notes.model
+package com.mt1729.notes.model.repository
 
+import com.mt1729.notes.model.Note
+import com.mt1729.notes.model.Tag
 import com.mt1729.notes.model.database.NoteDao
-import com.mt1729.notes.model.database.NoteEntity
 import com.mt1729.notes.model.database.NoteTagJoin
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class NoteRepository(
     private val noteDao: NoteDao,

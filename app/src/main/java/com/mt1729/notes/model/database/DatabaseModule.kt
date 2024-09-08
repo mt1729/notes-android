@@ -1,7 +1,6 @@
-package com.mt1729.notes.model
+package com.mt1729.notes.model.database
 
 import android.content.Context
-import com.mt1729.notes.model.database.NotesDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,7 +11,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RepositoryModule {
+object DatabaseModule {
     @Singleton
     @Provides
     fun providesNotesDatabase(
@@ -20,17 +19,5 @@ object RepositoryModule {
         coroutineScope: CoroutineScope,
     ): NotesDatabase {
         return NotesDatabase.getDatabase(appCtx, coroutineScope)
-    }
-
-    @Singleton
-    @Provides
-    fun providesNoteRepository(db: NotesDatabase): NoteRepository {
-        return NoteRepository(db.noteDao())
-    }
-
-    @Singleton
-    @Provides
-    fun providesTagRepository(db: NotesDatabase): TagRepository {
-        return TagRepository(db.tagDao())
     }
 }

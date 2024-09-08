@@ -1,11 +1,11 @@
-package com.mt1729.notes.feature.noteTagging
+package com.mt1729.notes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mt1729.notes.model.Note
-import com.mt1729.notes.model.NoteRepository
 import com.mt1729.notes.model.Tag
-import com.mt1729.notes.model.TagRepository
+import com.mt1729.notes.model.repository.NoteRepository
+import com.mt1729.notes.model.repository.TagRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

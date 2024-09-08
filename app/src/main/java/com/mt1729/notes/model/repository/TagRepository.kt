@@ -1,11 +1,9 @@
-package com.mt1729.notes.model
+package com.mt1729.notes.model.repository
 
+import com.mt1729.notes.model.Tag
 import com.mt1729.notes.model.database.TagDao
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 
 class TagRepository(
     private val tagDao: TagDao,

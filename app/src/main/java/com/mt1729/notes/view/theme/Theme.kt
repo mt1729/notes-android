@@ -1,4 +1,4 @@
-package com.mt1729.notes.ui.theme
+package com.mt1729.notes.view.theme
 
 import android.app.Activity
 import android.os.Build

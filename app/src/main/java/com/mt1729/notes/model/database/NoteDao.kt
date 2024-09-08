@@ -31,4 +31,6 @@ interface NoteDao {
     @Transaction
     @Query("SELECT * FROM note")
     fun getNotesWithTags(): Flow<List<NoteTagsRelation>>
+
+    // todo: get single note by id w/ tags
 }

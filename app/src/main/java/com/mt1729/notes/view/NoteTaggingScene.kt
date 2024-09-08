@@ -1,4 +1,4 @@
-package com.mt1729.notes.feature.noteTagging
+package com.mt1729.notes.view
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -50,6 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
+import com.mt1729.notes.viewmodel.NoteTaggingViewModel
+import com.mt1729.notes.viewmodel.NoteTaggingViewModelI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random.Default.nextBoolean

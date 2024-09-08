@@ -1,23 +1,4 @@
-package com.mt1729.notes.model
-
-import com.mt1729.notes.model.database.NoteEntity
-import com.mt1729.notes.model.database.NoteTagJoin
-import com.mt1729.notes.model.database.TagEntity
-
-val tmpTags = mutableListOf(
-    Tag(name = "Tag 1"),
-    Tag(name = "Tag 2"),
-    Tag(name = "Tag 3"),
-    Tag(name = "Tag 4"),
-    Tag(name = "Tag 5"),
-    Tag(name = "Tag 6"),
-    Tag(name = "Tag with a medium length name 1"),
-    Tag(name = "Tag with a medium length name 2"),
-    Tag(name = "Tag with a medium length name 3"),
-    Tag(name = "Tag with a medium length name 4"),
-    Tag(name = "Looooooooooooooooooooooooooooooooooooooooooooooooooong tag name 1"),
-    Tag(name = "Loooooooooooooooooooooooooooooooooooooooooooooooooooooonger tag name "),
-)
+package com.mt1729.notes.model.database
 
 val tmpTagEntities = arrayOf(
     TagEntity(tagId = 1, name = "Tag 1", colorHex = "#FF0000"),
