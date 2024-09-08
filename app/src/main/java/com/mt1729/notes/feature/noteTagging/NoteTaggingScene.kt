@@ -60,12 +60,17 @@ import kotlin.random.Random.Default.nextBoolean
 @Composable
 fun NoteTaggingPreview() {
     // todo: move test data
-    val mockTags = (1..20).map {
+    val mockTags = (1..20).map { index ->
         val extraTxt = if (nextBoolean()) " Extra" else ""
-        Tag(name = "$extraTxt Tag $it")
+        Tag(id = index.toLong(), name = "$extraTxt Tag $index", "#FF0000")
     }
-    val mockNotes = (1..3).map {
-        Note(content = "Note preview $it", tags = mockTags)
+    val mockNotes = (1..3).map { index ->
+        Note(
+            id = index.toLong(),
+            title = "Title $index",
+            content = "Note preview $index",
+            tags = mockTags
+        )
     }
     val mockSelectedNote = mockNotes.firstOrNull()
     val mockSelectedNoteHeader = "2 / 5"

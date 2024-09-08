@@ -101,35 +101,39 @@ class NoteTaggingViewModel @Inject constructor(
     }
 
     override fun addTagToSelectedNote(tag: Tag) {
-        val note = selectedNote.value ?: return
+        val selectedNote = selectedNote.value ?: return
+        val tagIsNewToNote = selectedNote.tags.find { it.id == tag.id } == null
 
-        val tagsInNote = note.tags.toMutableList()
-        if (!tagsInNote.contains(tag)) {
-            tagsInNote.add(tag)
-
-            val updatedNote = note.copy(tags = tagsInNote)
-            _selectedNote.update { updatedNote }
-            noteRepository.updateNote(updatedNote)
+        if (tagIsNewToNote) {
+            viewModelScope.launch {
+                // todo: _selectedNote.update { updatedNote }
+                noteRepository.addTagToNote(selectedNote, tag)
+            }
         }
     }
 
     override fun removeTagFromSelectedNote(tag: Tag) {
-        val note = selectedNote.value ?: return
+        val selectedNote = selectedNote.value ?: return
+        val tagExistsInNote = selectedNote.tags.find { it.id == tag.id } != null
 
-        val tags = note.tags.toMutableList()
-        if (tags.remove(tag)) {
-            val updatedNote = note.copy(tags = tags)
-            _selectedNote.update { updatedNote }
-            noteRepository.updateNote(updatedNote)
+        if (tagExistsInNote) {
+            viewModelScope.launch {
+                // todo: _selectedNote.update { updatedNote }
+                noteRepository.removeTagFromNote(selectedNote, tag)
+            }
         }
     }
 
     override fun deleteNote(note: Note) {
-        noteRepository.deleteNote(note)
+        viewModelScope.launch {
+            noteRepository.deleteNote(note)
+        }
     }
 
     override fun addNote(note: Note) {
-        noteRepository.addNote(note)
+        viewModelScope.launch {
+            noteRepository.addNote(note)
+        }
     }
 
     override fun filterTags(query: String) {
@@ -137,14 +141,15 @@ class NoteTaggingViewModel @Inject constructor(
     }
 
     override fun addTag(name: String) {
-        val newTag = Tag(name = name)
-        val selectedNote = selectedNote.value
+        val existingTags = _tags.value
+        val isNewTagName = existingTags.find { it.name.lowercase() == name.lowercase() } == null
 
-        val tagExistsInNote = selectedNote?.tags?.find { it.name == name } != null
-        if (!tagExistsInNote) {
-            addTagToSelectedNote(newTag)
+        if(isNewTagName) {
+            val newTag = Tag(name = name)
+
+            viewModelScope.launch {
+                tagRepository.addTag(newTag)
+            }
         }
-
-        tagRepository.addTag(newTag)
     }
 }

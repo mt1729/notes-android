@@ -1,8 +1,24 @@
 package com.mt1729.notes.model
 
-import java.util.UUID
+import com.mt1729.notes.model.database.TagEntity
 
 data class Tag(
-    val id: String = UUID.randomUUID().toString(),
+    val id: Long = -1,
     val name: String,
-)
+    val colorHex: String? = null,
+) {
+    // todo: dedicated mapper? cleaner
+    constructor(from: TagEntity) : this(
+        id = from.tagId,
+        name = from.name,
+        colorHex = from.colorHex,
+    )
+
+    fun toEntity(): TagEntity {
+        return TagEntity(
+            tagId = id,
+            name = name,
+            colorHex = colorHex,
+        )
+    }
+}

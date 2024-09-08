@@ -6,22 +6,23 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TagDao {
     @Insert
-    fun insert(vararg notes: TagEntity)
+    suspend fun insert(vararg notes: TagEntity)
 
     @Update
-    fun update(vararg notes: TagEntity)
+    suspend fun update(vararg notes: TagEntity)
 
     @Delete
-    fun delete(vararg notes: TagEntity)
+    suspend fun delete(vararg notes: TagEntity)
 
     @Query("SELECT * from tag")
-    fun getAll(): List<TagEntity>
+    fun getAll(): Flow<List<TagEntity>>
 
     @Transaction
     @Query("SELECT * FROM tag")
-    fun getTagNotes(): List<TagNotesRelation>
+    fun getTagsWithNotes(): Flow<List<TagNotesRelation>>
 }
