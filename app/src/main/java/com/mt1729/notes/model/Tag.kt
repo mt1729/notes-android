@@ -3,7 +3,7 @@ package com.mt1729.notes.model
 import com.mt1729.notes.model.database.TagEntity
 
 data class Tag(
-    val id: Long = -1,
+    val id: Long? = null,
     val name: String,
     val colorHex: String? = null,
 ) {
@@ -16,7 +16,7 @@ data class Tag(
 
     fun toEntity(): TagEntity {
         return TagEntity(
-            tagId = id,
+            tagId = id ?: 0,
             name = name,
             colorHex = colorHex,
         )

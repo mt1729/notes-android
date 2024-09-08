@@ -3,7 +3,7 @@ package com.mt1729.notes.model
 import com.mt1729.notes.model.database.NoteEntity
 
 data class Note(
-    val id: Long = -1,
+    val id: Long? = null,
     val title: String,
     val content: String,
     val tags: List<Tag>,
@@ -18,7 +18,7 @@ data class Note(
 
     fun toEntity(): NoteEntity {
         return NoteEntity(
-            noteId = id,
+            noteId = id ?: 0,
             title = title,
             content = content,
         )
