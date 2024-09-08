@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.mt1729.notes.view.NoteTaggingScene
+import com.mt1729.notes.view.NoteTaggingView
 import com.mt1729.notes.view.theme.NotesTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NoteTaggingScene()
+                    NoteTaggingView()
                 }
             }
         }

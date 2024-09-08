@@ -20,7 +20,10 @@ class TagRepository(
         tagDao.delete(tag.toEntity())
     }
 
-    suspend fun addTag(tag: Tag) {
-        tagDao.insert(tag.toEntity())
+    suspend fun addTag(tag: Tag): Tag {
+        // todo: error handling
+        val rowId = tagDao.insert(tag.toEntity())
+
+        return tag.copy(id = rowId)
     }
 }

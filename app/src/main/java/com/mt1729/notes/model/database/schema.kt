@@ -19,7 +19,7 @@ data class NoteEntity(
 data class TagEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "tag_id") val tagId: Long,
-    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "name") val name: String, // todo: unique
     @ColumnInfo(name = "color_hex") val colorHex: String?,
 )
 

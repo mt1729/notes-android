@@ -83,20 +83,20 @@ fun NoteTaggingPreview() {
         override val tagSearchQuery = MutableStateFlow("")
         override val filteredTags = MutableStateFlow(mockTags)
     }
-    NoteTaggingScene(vm = vm)
+    NoteTaggingView(vm = vm)
 }
 
 
 // Hilt-provided injection / run-time
 @Composable
-fun NoteTaggingScene(vm: NoteTaggingViewModel = viewModel()) {
-    NoteTaggingScene(vm = vm as NoteTaggingViewModelI)
+fun NoteTaggingView(vm: NoteTaggingViewModel = viewModel()) {
+    NoteTaggingView(vm = vm as NoteTaggingViewModelI)
 }
 
 // Preview-compatible overload
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
+fun NoteTaggingView(vm: NoteTaggingViewModelI) {
     val filteredTags by vm.filteredTags.collectAsState()
     val notes by vm.notes.collectAsState()
     val selectedNote by vm.selectedNote.collectAsState()

@@ -132,10 +132,15 @@ class NoteTaggingViewModel @Inject constructor(
         val isNewTagName = existingTags.find { it.name.lowercase() == name.lowercase() } == null
 
         if(isNewTagName) {
-            val newTag = Tag(name = name)
 
             viewModelScope.launch {
-                tagRepository.addTag(newTag)
+                val tagToCreate = Tag(name = name)
+                val createdTag = tagRepository.addTag(tagToCreate)
+
+
+                // Default behavior when creating a tag (assume it's for the note)
+                val selectedNote = selectedNote.value ?: return@launch
+                noteRepository.addTagToNote(selectedNote, createdTag)
             }
         }
     }

@@ -11,13 +11,16 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TagDao {
     @Insert
-    suspend fun insert(vararg notes: TagEntity)
+    suspend fun insert(tag: TagEntity): Long
+
+    @Insert
+    suspend fun insert(vararg tags: TagEntity): List<Long>
 
     @Update
-    suspend fun update(vararg notes: TagEntity)
+    suspend fun update(vararg tags: TagEntity)
 
     @Delete
-    suspend fun delete(vararg notes: TagEntity)
+    suspend fun delete(vararg tags: TagEntity)
 
     @Query("SELECT * from tag")
     fun getAll(): Flow<List<TagEntity>>
