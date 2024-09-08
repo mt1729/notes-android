@@ -1,6 +1,6 @@
 package com.mt1729.notes.model
 
-import com.mt1729.notes.model.database.TagEntity
+import com.mt1729.notes.model.database.entity.TagEntity
 
 data class Tag(
     val id: Long? = null,

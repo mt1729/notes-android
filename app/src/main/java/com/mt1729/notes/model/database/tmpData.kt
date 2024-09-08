@@ -1,5 +1,9 @@
 package com.mt1729.notes.model.database
 
+import com.mt1729.notes.model.database.entity.NoteEntity
+import com.mt1729.notes.model.database.entity.NoteTagEntity
+import com.mt1729.notes.model.database.entity.TagEntity
+
 val tmpTagEntities = arrayOf(
     TagEntity(tagId = 1, name = "Tag 1", colorHex = "#FF0000"),
     TagEntity(tagId = 2, name = "Tag 2", colorHex = "#00FF00"),
@@ -56,18 +60,18 @@ val tmpNoteEntities = arrayOf(
 )
 
 val tmpNoteTagJoins = arrayOf(
-    NoteTagJoin(1, 1),
-    NoteTagJoin(1, 2),
-    NoteTagJoin(1, 3),
-    NoteTagJoin(1, 4),
-    NoteTagJoin(1, 5),
-    NoteTagJoin(1, 6),
+    NoteTagEntity(1, 1),
+    NoteTagEntity(1, 2),
+    NoteTagEntity(1, 3),
+    NoteTagEntity(1, 4),
+    NoteTagEntity(1, 5),
+    NoteTagEntity(1, 6),
 
-    NoteTagJoin(2, 7),
-    NoteTagJoin(2, 8),
-    NoteTagJoin(2, 9),
-    NoteTagJoin(2, 10),
+    NoteTagEntity(2, 7),
+    NoteTagEntity(2, 8),
+    NoteTagEntity(2, 9),
+    NoteTagEntity(2, 10),
 
-    NoteTagJoin(3, 11),
-    NoteTagJoin(3, 12),
+    NoteTagEntity(3, 11),
+    NoteTagEntity(3, 12),
 )

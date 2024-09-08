@@ -19,6 +19,6 @@ object RepositoryModule {
     @Singleton
     @Provides
     fun providesTagRepository(db: NotesDatabase): TagRepository {
-        return TagRepository(db.tagDao())
+        return TagRepository(db.tagDao(), db.noteTagDao())
     }
 }

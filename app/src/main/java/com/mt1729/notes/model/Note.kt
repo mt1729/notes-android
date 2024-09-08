@@ -1,6 +1,6 @@
 package com.mt1729.notes.model
 
-import com.mt1729.notes.model.database.NoteEntity
+import com.mt1729.notes.model.database.entity.NoteEntity
 
 data class Note(
     val id: Long? = null,

@@ -50,23 +50,23 @@ class NoteTaggingViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val tagRepository: TagRepository,
 ) : ViewModel(), NoteTaggingViewModelI {
-    override val notes = noteRepository.getNotes()
+    private val _tagSearchQuery = MutableStateFlow("")
+    private val _selectedNoteIndex = MutableStateFlow(0)
+
+    override val tagSearchQuery get() = _tagSearchQuery.asStateFlow()
+
+    override val notes = noteRepository.notes
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // todo: refactor to set (list checking redundant)
-    override val tags = tagRepository.getTags()
+    override val tags = tagRepository.tags
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    private val _tagSearchQuery = MutableStateFlow("")
-    override val tagSearchQuery get() = _tagSearchQuery.asStateFlow()
-
-
-    private val _selectedNoteIndex = MutableStateFlow(0)
-    override val selectedNote get() = combine(notes, _selectedNoteIndex) { notes, selectedNoteIndex ->
+    override val selectedNote = combine(notes, _selectedNoteIndex) { notes, selectedNoteIndex ->
         notes.getOrNull(selectedNoteIndex)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
-    override val filteredTags get() = combine(tags, _tagSearchQuery) { tags, tagSearchQuery ->
+    override val filteredTags = combine(tags, _tagSearchQuery) { tags, tagSearchQuery ->
         tags.filter {
             it.name.lowercase().startsWith(tagSearchQuery.lowercase())
         }.sortedBy {
@@ -95,7 +95,7 @@ class NoteTaggingViewModel @Inject constructor(
 
         if (tagIsNewToNote) {
             viewModelScope.launch {
-                noteRepository.addTagToNote(selectedNote, tag)
+                tagRepository.addTagToNote(tag, selectedNote)
             }
         }
     }
@@ -106,7 +106,7 @@ class NoteTaggingViewModel @Inject constructor(
 
         if (tagExistsInNote) {
             viewModelScope.launch {
-                noteRepository.removeTagFromNote(selectedNote, tag)
+                tagRepository.removeTagFromNote(tag, selectedNote)
             }
         }
     }
@@ -128,20 +128,15 @@ class NoteTaggingViewModel @Inject constructor(
     }
 
     override fun addTag(name: String) {
+        val note = selectedNote.value
         val existingTags = tags.value
         val isNewTagName = existingTags.find { it.name.lowercase() == name.lowercase() } == null
+        val tagToCreate = Tag(name = name)
 
-        if(isNewTagName) {
-
-            viewModelScope.launch {
-                val tagToCreate = Tag(name = name)
-                val createdTag = tagRepository.addTag(tagToCreate)
-
-
-                // Default behavior when creating a tag (assume it's for the note)
-                val selectedNote = selectedNote.value ?: return@launch
-                noteRepository.addTagToNote(selectedNote, createdTag)
-            }
+        if (isNewTagName && note != null) {
+            viewModelScope.launch { tagRepository.createTagForNote(tagToCreate, note) }
+        } else if (isNewTagName) {
+            viewModelScope.launch { tagRepository.createTag(tagToCreate) }
         }
     }
 }

@@ -1,29 +1,48 @@
 package com.mt1729.notes.model.repository
 
+import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
-import com.mt1729.notes.model.database.TagDao
-import kotlinx.coroutines.flow.Flow
+import com.mt1729.notes.model.database.dao.NoteTagDao
+import com.mt1729.notes.model.database.dao.TagDao
+import com.mt1729.notes.model.database.entity.NoteTagEntity
 import kotlinx.coroutines.flow.map
 
 class TagRepository(
     private val tagDao: TagDao,
+    private val noteTagDao: NoteTagDao,
 ) {
-    private val _tags = tagDao.getAll().map { entities ->
+    val tags = tagDao.getAll().map { entities ->
         entities.map { Tag(from = it) }
     }
-    fun getTags(): Flow<List<Tag>> = _tags
 
     suspend fun updateTag(tag: Tag) {
         tagDao.update(tag.toEntity())
     }
+
     suspend fun deleteTag(tag: Tag) {
         tagDao.delete(tag.toEntity())
     }
 
-    suspend fun addTag(tag: Tag): Tag {
-        // todo: error handling
-        val rowId = tagDao.insert(tag.toEntity())
+    suspend fun createTag(tag: Tag) {
+        tagDao.insert(tag.toEntity())
+    }
 
-        return tag.copy(id = rowId)
+    suspend fun createTagForNote(tagToCreate: Tag, existingNote: Note) {
+        val newTagId = tagDao.insert(tagToCreate.toEntity())
+
+        // Note should already have been created (non 0 id)
+        val existingNoteId = existingNote.id ?: return
+        val newJoin = NoteTagEntity(existingNoteId, newTagId)
+        noteTagDao.insertNoteTagJoins(newJoin)
+    }
+
+    suspend fun addTagToNote(existingTag: Tag, existingNote: Note) {
+        val newJoin = NoteTagEntity(existingNote.toEntity().noteId, existingTag.toEntity().tagId)
+        noteTagDao.insertNoteTagJoins(newJoin)
+    }
+
+    suspend fun removeTagFromNote(tagToRemove: Tag, existingNote: Note) {
+        val oldJoin = NoteTagEntity(existingNote.toEntity().noteId, tagToRemove.toEntity().tagId)
+        noteTagDao.deleteNoteTagJoins(oldJoin)
     }
 }
