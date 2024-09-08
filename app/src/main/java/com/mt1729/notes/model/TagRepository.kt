@@ -4,22 +4,25 @@ import com.mt1729.notes.model.database.TagDao
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 class TagRepository(
     private val tagDao: TagDao,
 ) {
-    private val _tags = MutableStateFlow<List<Tag>>(tmpTags)
+    private val _tags = tagDao.getAll().map { entities ->
+        entities.map { Tag(from = it) }
+    }
     fun getTags(): Flow<List<Tag>> = _tags
 
-    fun updateTag(tag: Tag) {}
-    fun deleteTag(tag: Tag) {}
-    fun addTag(tag: Tag) {
-        val tags = _tags.value
-        val tagExists = tags.find { it.name == tag.name } != null
+    suspend fun updateTag(tag: Tag) {
+        tagDao.update(tag.toEntity())
+    }
+    suspend fun deleteTag(tag: Tag) {
+        tagDao.delete(tag.toEntity())
+    }
 
-        if (!tagExists) {
-            _tags.update { it + tag }
-        }
+    suspend fun addTag(tag: Tag) {
+        tagDao.insert(tag.toEntity())
     }
 }
