@@ -29,7 +29,7 @@ interface NoteTaggingViewModelI {
 
     fun addNote(note: Note) {}
     fun deleteNote(note: Note) {}
-    fun selectNote(noteIndex: Int) {}
+    fun selectNoteIndex(index: Int) {}
     fun filterTags(query: String) {}
     fun addTagToSelectedNote(tag: Tag) {}
     fun removeTagFromSelectedNote(tag: Tag) {}
@@ -50,20 +50,23 @@ class NoteTaggingViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
     private val tagRepository: TagRepository,
 ) : ViewModel(), NoteTaggingViewModelI {
-    private val _notes = MutableStateFlow<List<Note>>(emptyList())
-    override val notes get() = _notes.asStateFlow()
+    override val notes = noteRepository.getNotes()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     // todo: refactor to set (list checking redundant)
-    private val _tags = MutableStateFlow<List<Tag>>(emptyList())
-    override val tags get() = _tags.asStateFlow()
+    override val tags = tagRepository.getTags()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     private val _tagSearchQuery = MutableStateFlow("")
     override val tagSearchQuery get() = _tagSearchQuery.asStateFlow()
 
-    private val _selectedNote = MutableStateFlow<Note?>(null)
-    override val selectedNote get() = _selectedNote.asStateFlow()
 
-    override val filteredTags get() = combine(_tags, _tagSearchQuery) { tags, tagSearchQuery ->
+    private val _selectedNoteIndex = MutableStateFlow(0)
+    override val selectedNote get() = combine(notes, _selectedNoteIndex) { notes, selectedNoteIndex ->
+        notes.getOrNull(selectedNoteIndex)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    override val filteredTags get() = combine(tags, _tagSearchQuery) { tags, tagSearchQuery ->
         tags.filter {
             it.name.lowercase().startsWith(tagSearchQuery.lowercase())
         }.sortedBy {
@@ -71,8 +74,8 @@ class NoteTaggingViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    override val selectedNoteHeader = _selectedNote.map { selectedNote ->
-        val notes = _notes.value
+    override val selectedNoteHeader = selectedNote.map { selectedNote ->
+        val notes = notes.value
         val currNoteIndex = notes.indexOfFirst { it.id == selectedNote?.id }
 
         return@map if (selectedNote == null || currNoteIndex < 0) {
@@ -82,22 +85,8 @@ class NoteTaggingViewModel @Inject constructor(
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
 
-    init {
-        viewModelScope.launch {
-            noteRepository.getNotes().collect { newNotes ->
-                _notes.update { newNotes }
-            }
-        }
-
-        viewModelScope.launch {
-            tagRepository.getTags().collect { newTags ->
-                _tags.update { newTags }
-            }
-        }
-    }
-
-    override fun selectNote(noteIndex: Int) {
-        _selectedNote.update { _notes.value.getOrNull(noteIndex) }
+    override fun selectNoteIndex(index: Int) {
+        _selectedNoteIndex.update { index }
     }
 
     override fun addTagToSelectedNote(tag: Tag) {
@@ -106,7 +95,6 @@ class NoteTaggingViewModel @Inject constructor(
 
         if (tagIsNewToNote) {
             viewModelScope.launch {
-                // todo: _selectedNote.update { updatedNote }
                 noteRepository.addTagToNote(selectedNote, tag)
             }
         }
@@ -118,7 +106,6 @@ class NoteTaggingViewModel @Inject constructor(
 
         if (tagExistsInNote) {
             viewModelScope.launch {
-                // todo: _selectedNote.update { updatedNote }
                 noteRepository.removeTagFromNote(selectedNote, tag)
             }
         }
@@ -141,7 +128,7 @@ class NoteTaggingViewModel @Inject constructor(
     }
 
     override fun addTag(name: String) {
-        val existingTags = _tags.value
+        val existingTags = tags.value
         val isNewTagName = existingTags.find { it.name.lowercase() == name.lowercase() } == null
 
         if(isNewTagName) {

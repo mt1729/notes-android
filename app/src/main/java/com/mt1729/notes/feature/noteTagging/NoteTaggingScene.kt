@@ -32,7 +32,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.ShapeDefaults
-import androidx.compose.material3.Shapes
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -52,7 +51,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mt1729.notes.model.Note
 import com.mt1729.notes.model.Tag
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random.Default.nextBoolean
 
@@ -109,7 +107,7 @@ fun NoteTaggingScene(vm: NoteTaggingViewModelI) {
     LaunchedEffect(key1 = notePagerState) {
         snapshotFlow {
             notePagerState.currentPage
-        }.collect { pageIndex -> vm.selectNote(pageIndex) }
+        }.collect { pageIndex -> vm.selectNoteIndex(pageIndex) }
     }
 
     Scaffold(topBar = {
